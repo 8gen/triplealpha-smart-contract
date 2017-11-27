@@ -3,6 +3,9 @@ compile: deps
 	@solidity_flattener --solc-paths=zeppelin-solidity=$(shell pwd)/node_modules/zeppelin-solidity/ contracts/TripleAlphaCrowdsale.sol | sed 's|^pragma solidity \^0.4.13|pragma solidity \^0.4.18|g' > build/CombinedCrowdsale.sol
 	@solc zeppelin-solidity=$(shell pwd)/node_modules/zeppelin-solidity/ contracts/TripleAlphaToken.sol  --abi  2>/dev/null| grep :TripleAlphaToken -A2 | tail -n1 | python -m json.tool > build/TripleAlphaToken.abi
 	@solc zeppelin-solidity=$(shell pwd)/node_modules/zeppelin-solidity/ contracts/TripleAlphaCrowdsale.sol  --abi  2>/dev/null| grep :TripleAlphaCrowdsale -A2 | tail -n1 | python -m json.tool > build/TripleAlphaCrowdsale.abi
+	@solidity_flattener --solc-paths=zeppelin-solidity=$(shell pwd)/node_modules/zeppelin-solidity/ contracts/TripleAlphaCrowdsalePreICO.sol | sed 's|^pragma solidity \^0.4.13|pragma solidity \^0.4.18|g' > build/CombinedCrowdsalePreICO.sol
+	@solc zeppelin-solidity=$(shell pwd)/node_modules/zeppelin-solidity/ contracts/TripleAlphaTokenPreICO.sol  --abi  2>/dev/null| grep :TripleAlphaToken -A2 | tail -n1 | python -m json.tool > build/TripleAlphaTokenPreICO.abi
+	@solc zeppelin-solidity=$(shell pwd)/node_modules/zeppelin-solidity/ contracts/TripleAlphaCrowdsalePreICO.sol  --abi  2>/dev/null| grep :TripleAlphaCrowdsale -A2 | tail -n1 | python -m json.tool > build/TripleAlphaCrowdsalePreICO.abi
 
 node_modules:
 	npm install
@@ -11,7 +14,7 @@ deps: node_modules
 	@pip3 install solidity_flattener -q
 	
 test: node_modules
-	@truffle --network local test tests/sale.js
+	@truffle --network local test tests/presale.js
 
 testrpc:
 	./node_modules/.bin/testrpc \

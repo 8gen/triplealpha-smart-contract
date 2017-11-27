@@ -106,8 +106,8 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("token.transfer → allow transfer token after ITO", async () => {
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoHardCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOhardCapInWei();
 
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
@@ -144,7 +144,7 @@ contract('Crowdsale', (accounts) => {
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: 1e18, gas: 120000});
         balance2 = await web3.eth.getBalance(wallet);
 
-        assert.equal(Math.round((balance2 - balance1)/1e14), 1e4);
+            assert.equal(Math.round((balance2 - balance1)/1e14), 1e4);
     });
 
     it("finishCrowdsale → finish minting", async() => {
@@ -157,7 +157,7 @@ contract('Crowdsale', (accounts) => {
         totalSupply = (await token.totalSupply()).toNumber();
         assert.equal(((totalSupply)/1e18).toFixed(4), (tokenOnClient/1e18).toFixed(4));
 
-        await increaseTime(duration.days(60));
+        await increaseTime(duration.days(91));
         await sale.finishCrowdsale();
         assert.equal((await token.mintingFinished()), true);
     });
@@ -230,7 +230,7 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("send → Donate between Pre-ITO and ITO", async () => {
-        await increaseTime(duration.weeks(1) + duration.weeks(2));
+        await increaseTime(duration.weeks(1) + duration.days(30));
         await shouldHaveException(async () => {
             await web3.eth.sendTransaction({from: client1, to: sale.address, value: 4e18, gas: 120000});
         }, "Should has an error");
@@ -242,7 +242,7 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("send → Donate after ITO endTime", async () => {
-        await increaseTime(duration.weeks(1) + duration.days(31) + duration.weeks(4));
+        await increaseTime(duration.weeks(1) + duration.days(31) + duration.days(60));
         await shouldHaveException(async () => {
             await web3.eth.sendTransaction({from: client1, to: sale.address, value: 1e18, gas: 120000});
         }, "Should has an error");
@@ -250,7 +250,7 @@ contract('Crowdsale', (accounts) => {
 
     it("send → Donate max ether for Pre-ITO", async () => {
         let started_balance = (await web3.eth.getBalance(wallet)).toNumber();
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
         let end_balance = (await web3.eth.getBalance(wallet)).toNumber();
@@ -263,7 +263,7 @@ contract('Crowdsale', (accounts) => {
     it("send → Donate more then max ether for Pre-ITO", async () => {
         let started_balance = (await web3.eth.getBalance(wallet)).toNumber();
         let started_client_balance = (await web3.eth.getBalance(client1)).toNumber();
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei + 1e18, gas: 120000});
         let end_balance = (await web3.eth.getBalance(wallet)).toNumber();
@@ -279,7 +279,7 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("send → Donate after endTime", async () => {
-        await increaseTime(duration.days(69));
+        await increaseTime(duration.days(120));
 
         await shouldHaveException(async () => {
             await web3.eth.sendTransaction({from: client, to: sale.address, value: 4e18, gas: 120000});
@@ -292,8 +292,8 @@ contract('Crowdsale', (accounts) => {
     it("finishMinting → test", async () => {
         let end_balance, tokenOnClientWallet, totalSupply;
         let started_balance = (await web3.eth.getBalance(wallet)).toNumber();
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoHardCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOhardCapInWei();
         let maxWei = ITOMaxWei.add(PreITOMaxWei);
 
         await increaseTime(duration.weeks(1));
@@ -321,9 +321,9 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("refund → refund ethers back to backers if not softcap reached after ito", async() => {
-        let balance1, balance2;
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoHardCapInWei();
+        let balance1, balance2, balance3;
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOhardCapInWei();
 
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
@@ -337,18 +337,21 @@ contract('Crowdsale', (accounts) => {
 
         await web3.eth.sendTransaction({gas: 120000, from: client2, to: sale.address, value: 10e18});
 
-        await increaseTime(duration.days(31));
+        await increaseTime(duration.days(100));
         await sale.finishCrowdsale();
 
-        await sale.refund({from: client2});
         balance2 = await web3.eth.getBalance(client2);
-        assert.equal(balance1.toNumber(), balance2.toNumber());
+        assert.equal(balance1.toNumber(), balance2.add(10e18).toNumber());
+
+        await sale.refund({from: client2});
+        balance3 = await web3.eth.getBalance(client2);
+        assert.equal(balance1.toNumber(), balance3.toNumber());
     });
 
     it("refund → refund ethers back to backers if softcap reached after ito", async() => {
         await increaseTime(duration.weeks(1));
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoHardCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOhardCapInWei();
 
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
@@ -365,8 +368,8 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("refund → refund ethers back to backers if softcap reached when ito in progress", async() => {
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoHardCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOhardCapInWei();
 
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
@@ -382,8 +385,8 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("refund → refund ethers back to backers if not softcap reached when ito in progress", async() => {
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoSoftCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOsoftCapInWei();
 
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
@@ -401,8 +404,8 @@ contract('Crowdsale', (accounts) => {
     });
 
     it("refund → token should burned", async() => {
-        let PreITOMaxWei = await sale.phaseOneHardCapInWei();
-        let ITOMaxWei = await sale.phaseTwoSoftCapInWei();
+        let PreITOMaxWei = await sale.PREITOhardCapInWei();
+        let ITOMaxWei = await sale.ITOsoftCapInWei();
 
         await increaseTime(duration.weeks(1));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: PreITOMaxWei, gas: 120000});
@@ -410,18 +413,18 @@ contract('Crowdsale', (accounts) => {
         await increaseTime(duration.days(31));
         await web3.eth.sendTransaction({from: client1, to: sale.address, value: 1e18, gas: 120000});
 
-        await increaseTime(duration.days(31));
+        await increaseTime(duration.days(100));
         await sale.finishCrowdsale();
 
-        let client_balance = (await token.balanceOf(client1));
+        let client1_balance = (await token.balanceOf(client1));
 
         await sale.refund({from: client1});
 
-        let client_balance2 = (await token.balanceOf(client1));
+        let client1_balance2 = (await token.balanceOf(client1));
         let burn_balance = (await token.balanceOf(0x0));
 
-        assert.equal(client_balance.toNumber(), burn_balance.toNumber());
-        assert.equal(client_balance2, 0);
+        assert.equal(client1_balance.toNumber(), burn_balance.toNumber());
+        assert.equal(client1_balance2, 0);
     });
 
     it("Transfer → should do something that fires Transfer", async () => {
@@ -436,35 +439,35 @@ contract('Crowdsale', (accounts) => {
         });
     });
 
-    it("setPhaseOneStartTime → set and check", async() => {
-        let set_start_time_PreITO = (await sale.SetPhaseOneStartTime({fromBlock: 0, toBlock: 'latest'}))
+    it("setPREITOstartTime → set and check", async() => {
+        let set_start_time_PreITO = (await sale.SetPREITOstartTime({fromBlock: 0, toBlock: 'latest'}))
 
-        let time1 = await sale.phaseOneStartTime();
-        await sale.setPhaseOneStartTime(startTime1 + duration.days(1));
+        let time1 = await sale.PREITOstartTime();
+        await sale.setPREITOstartTime(startTime1 + duration.days(1));
 
         set_start_time_PreITO.get((err, events) => {
             assert.equal(events.length, 1);
-            assert.equal(events[0].event, 'SetPhaseOneStartTime');
+            assert.equal(events[0].event, 'SetPREITOstartTime');
         });
 
-        let time2 = await sale.phaseOneStartTime();
+        let time2 = await sale.PREITOstartTime();
         assert.equal(time2-time1, duration.days(1));
 
         await increaseTime(duration.days(8));
 
         await shouldHaveException(async () => {
-            await sale.setPhaseOneStartTime(startTime1 - duration.weeks(1));
+            await sale.setPREITOstartTime(startTime1 - duration.weeks(1));
         }, "Should has an error");
 
 
     });
 
-    it("setPhaseOneStartTime → wrong owner", async() => {
-        let set_start_time_PreITO = (await sale.SetPhaseOneStartTime({fromBlock: 0, toBlock: 'latest'}))
+    it("setPREITOstartTime → wrong owner", async() => {
+        let set_start_time_PreITO = (await sale.SetPREITOstartTime({fromBlock: 0, toBlock: 'latest'}))
 
 
         await shouldHaveException(async () => {
-            await sale.setPhaseOneStartTime(startTime1 + duration.days(1), {from: client1});
+            await sale.setPREITOstartTime(startTime1 + duration.days(1), {from: client1});
         }, "Should has an error");
 
         set_start_time_PreITO.get((err, events) => {
@@ -473,27 +476,27 @@ contract('Crowdsale', (accounts) => {
 
     });
 
-    it("setPhaseTwoStartTime → set and check", async() => {
-        let set_start_time_ITO = (await sale.SetPhaseTwoStartTime({fromBlock: 0, toBlock: 'latest'}))
+    it("setITOstartTime → set and check", async() => {
+        let set_start_time_ITO = (await sale.SetITOstartTime({fromBlock: 0, toBlock: 'latest'}))
 
-        let time1 = await sale.phaseTwoStartTime();
-        await sale.setPhaseTwoStartTime(startTime2 + duration.days(1));
+        let time1 = await sale.ITOstartTime();
+        await sale.setITOstartTime(startTime2 + duration.days(1));
 
         set_start_time_ITO.get((err, events) => {
             assert.equal(events.length, 1);
-            assert.equal(events[0].event, 'SetPhaseTwoStartTime');
+            assert.equal(events[0].event, 'SetITOstartTime');
         });
 
-        let time2 = await sale.phaseTwoStartTime();
+        let time2 = await sale.ITOstartTime();
         assert.equal(time2-time1, duration.days(1));
     });
 
-    it("setPhaseTwoStartTime → wrong owner", async() => {
-        let set_start_time_ITO = (await sale.SetPhaseTwoStartTime({fromBlock: 0, toBlock: 'latest'}))
+    it("setITOstartTime → wrong owner", async() => {
+        let set_start_time_ITO = (await sale.SetITOstartTime({fromBlock: 0, toBlock: 'latest'}))
 
 
         await shouldHaveException(async () => {
-            await sale.setPhaseTwoStartTime(startTime2 + duration.days(1), {from: client1});
+            await sale.setITOstartTime(startTime2 + duration.days(1), {from: client1});
         }, "Should has an error");
 
         set_start_time_ITO.get((err, events) => {

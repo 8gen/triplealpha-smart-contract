@@ -2,19 +2,6 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneStartTime",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
         "name": "withinPeriod",
         "outputs": [
             {
@@ -28,7 +15,33 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseTwoEndTime",
+        "name": "ITOwei",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_price",
+                "type": "uint256"
+            }
+        ],
+        "name": "changeEthPrice",
+        "outputs": [],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "PREITOhardCapInUSD",
         "outputs": [
             {
                 "name": "",
@@ -41,7 +54,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseTwoWeiPerToken",
+        "name": "PREITOendTime",
         "outputs": [
             {
                 "name": "",
@@ -54,33 +67,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneWeiPerToken",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseTwoSoftCapInWei",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseOneWei",
+        "name": "ITOweiPerToken",
         "outputs": [
             {
                 "name": "",
@@ -124,46 +111,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneHardCapInWei",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": false,
-        "inputs": [
-            {
-                "name": "_at",
-                "type": "uint256"
-            }
-        ],
-        "name": "setPhaseOneStartTime",
-        "outputs": [],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseTwoHardCapInWei",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseTwoHardCapInUSD",
+        "name": "PREITOmainCapInUSD",
         "outputs": [
             {
                 "name": "",
@@ -189,11 +137,11 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseTwoStartTime",
+        "name": "wallet",
         "outputs": [
             {
                 "name": "",
-                "type": "uint256"
+                "type": "address"
             }
         ],
         "payable": false,
@@ -202,11 +150,11 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "wallet",
+        "name": "PREITOmainCapInWei",
         "outputs": [
             {
                 "name": "",
-                "type": "address"
+                "type": "uint256"
             }
         ],
         "payable": false,
@@ -257,7 +205,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseTwoPeriod",
+        "name": "ITOstartTime",
         "outputs": [
             {
                 "name": "",
@@ -270,7 +218,33 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneHardCapInUSD",
+        "name": "ITOperiod",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "ITOsoftCapInUSD",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "ITOendTime",
         "outputs": [
             {
                 "name": "",
@@ -294,19 +268,6 @@
         "type": "function"
     },
     {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseOneTokenPriceUSD",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
         "constant": false,
         "inputs": [
             {
@@ -320,15 +281,15 @@
         "type": "function"
     },
     {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseTwoTokenPriceUSD",
-        "outputs": [
+        "constant": false,
+        "inputs": [
             {
-                "name": "",
+                "name": "_at",
                 "type": "uint256"
             }
         ],
+        "name": "setPREITOstartTime",
+        "outputs": [],
         "payable": false,
         "type": "function"
     },
@@ -348,7 +309,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseTwoMainCapInUSD",
+        "name": "PREITOtokenPriceUSD",
         "outputs": [
             {
                 "name": "",
@@ -361,7 +322,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneMainCapInUSD",
+        "name": "ITOmainCapInUSD",
         "outputs": [
             {
                 "name": "",
@@ -372,15 +333,15 @@
         "type": "function"
     },
     {
-        "constant": false,
-        "inputs": [
+        "constant": true,
+        "inputs": [],
+        "name": "PREITOweiPerToken",
+        "outputs": [
             {
-                "name": "_at",
+                "name": "",
                 "type": "uint256"
             }
         ],
-        "name": "setPhaseTwoStartTime",
-        "outputs": [],
         "payable": false,
         "type": "function"
     },
@@ -413,7 +374,7 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneMainCapInWei",
+        "name": "PREITOwei",
         "outputs": [
             {
                 "name": "",
@@ -426,7 +387,46 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseTwoMainCapInWei",
+        "name": "ITOmainCapInWei",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "ITOsoftCapInWei",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "PREITOperiod",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "ITOtokenPriceUSD",
         "outputs": [
             {
                 "name": "",
@@ -450,23 +450,36 @@
         "type": "function"
     },
     {
-        "constant": false,
-        "inputs": [],
-        "name": "finishCrowdsale",
-        "outputs": [],
-        "payable": false,
-        "type": "function"
-    },
-    {
         "constant": true,
         "inputs": [],
-        "name": "phaseOneEndTime",
+        "name": "ITOhardCapInWei",
         "outputs": [
             {
                 "name": "",
                 "type": "uint256"
             }
         ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_at",
+                "type": "uint256"
+            }
+        ],
+        "name": "setITOstartTime",
+        "outputs": [],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [],
+        "name": "finishCrowdsale",
+        "outputs": [],
         "payable": false,
         "type": "function"
     },
@@ -510,6 +523,19 @@
         "type": "function"
     },
     {
+        "constant": true,
+        "inputs": [],
+        "name": "ITOhardCapInUSD",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
         "constant": false,
         "inputs": [],
         "name": "unhalt",
@@ -525,32 +551,6 @@
             {
                 "name": "",
                 "type": "bool"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseTwoSoftCapInUSD",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "payable": false,
-        "type": "function"
-    },
-    {
-        "constant": true,
-        "inputs": [],
-        "name": "phaseTwoWei",
-        "outputs": [
-            {
-                "name": "",
-                "type": "uint256"
             }
         ],
         "payable": false,
@@ -590,7 +590,20 @@
     {
         "constant": true,
         "inputs": [],
-        "name": "phaseOnePeriod",
+        "name": "PREITOstartTime",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "PREITOhardCapInWei",
         "outputs": [
             {
                 "name": "",
@@ -616,11 +629,11 @@
     {
         "inputs": [
             {
-                "name": "_phaseOneStartTime",
+                "name": "_PREITOstartTime",
                 "type": "uint256"
             },
             {
-                "name": "_phaseTwoStartTime",
+                "name": "_ITOstartTime",
                 "type": "uint256"
             },
             {
@@ -679,11 +692,11 @@
         "inputs": [
             {
                 "indexed": false,
-                "name": "new_startTimePhaseOne",
+                "name": "new_startTimePREITO",
                 "type": "uint256"
             }
         ],
-        "name": "SetPhaseOneStartTime",
+        "name": "SetPREITOstartTime",
         "type": "event"
     },
     {
@@ -691,11 +704,11 @@
         "inputs": [
             {
                 "indexed": false,
-                "name": "new_startTimePhaseTwo",
+                "name": "new_startTimeITO",
                 "type": "uint256"
             }
         ],
-        "name": "SetPhaseTwoStartTime",
+        "name": "SetITOstartTime",
         "type": "event"
     },
     {

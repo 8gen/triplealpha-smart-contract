@@ -6,12 +6,13 @@ import './Haltable.sol';
 import './MultiOwners.sol';
 
 
+ // @title TripleAlpha crowdsale contract
 contract TripleAlphaCrowdsale is MultiOwners, Haltable {
     using SafeMath for uint256;
 
     // Global
     // ETHUSD change rate
-    uint256 public rateETHUSD = 300e2;
+    uint256 public rateETHUSD;
 
     // minimal token selled per time
     uint256 public minimalTokens = 1e18;
@@ -23,57 +24,58 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
     address public wallet;
 
     // Pre-ICO
-    // Maximum possible cap in USD on phaseOne
-    uint256 public phaseOneMainCapInUSD = 1000000e2;
+    // Maximum possible cap in USD on PREITO
+    uint256 public PREITOmainCapInUSD = 1000000e2;
 
-    // Maximum possible cap in USD on phaseOne
-    uint256 public phaseOneHardCapInUSD = phaseOneMainCapInUSD;
+    // Maximum possible cap in USD on PREITO
+    uint256 public PREITOhardCapInUSD = PREITOmainCapInUSD;
 
-    uint256 public phaseOnePeriod = 14 days;
+    // PreITO period in days
+    uint256 public PREITOperiod = 30 days;
 
     // Token Price in USD
-    uint256 public phaseOneTokenPriceUSD = 50;
+    uint256 public PREITOtokenPriceUSD = 50;
 
     // WEI per token
-    uint256 public phaseOneWeiPerToken = phaseOneTokenPriceUSD.mul(1 ether).div(rateETHUSD);
+    uint256 public PREITOweiPerToken;
     
     // start and end timestamp where investments are allowed (both inclusive)
-    uint256 public phaseOneStartTime;
-    uint256 public phaseOneEndTime;
+    uint256 public PREITOstartTime;
+    uint256 public PREITOendTime;
 
     // total wei received during phase one
-    uint256 public phaseOneWei;
+    uint256 public PREITOwei;
 
     // Maximum possible cap in wei for phase one
-    uint256 public phaseOneMainCapInWei = phaseOneMainCapInUSD.mul(1 ether).div(rateETHUSD);
+    uint256 public PREITOmainCapInWei;
     // Maximum possible cap in wei
-    uint256 public phaseOneHardCapInWei = phaseOneMainCapInWei;
+    uint256 public PREITOhardCapInWei;
 
 
     // ICO
-    // Minimal possible cap in USD on phaseTwo
-    uint256 public phaseTwoSoftCapInUSD = 1000000e2;
+    // Minimal possible cap in USD on ITO
+    uint256 public ITOsoftCapInUSD = 1000000e2;
 
-    // Maximum possible cap in USD on phaseTwo
-    uint256 public phaseTwoMainCapInUSD = 8000000e2;
+    // Maximum possible cap in USD on ITO
+    uint256 public ITOmainCapInUSD = 8000000e2;
 
-    uint256 public phaseTwoPeriod = 28 days;
+    uint256 public ITOperiod = 60 days;
 
-    // Maximum possible cap in USD on phaseTwo
-    uint256 public phaseTwoHardCapInUSD = phaseTwoSoftCapInUSD + phaseTwoMainCapInUSD;
+    // Maximum possible cap in USD on ITO
+    uint256 public ITOhardCapInUSD = ITOsoftCapInUSD + ITOmainCapInUSD;
 
     // Token Price in USD
-    uint256 public phaseTwoTokenPriceUSD = 100;
+    uint256 public ITOtokenPriceUSD = 100;
 
     // WEI per token
-    uint256 public phaseTwoWeiPerToken = phaseTwoTokenPriceUSD.mul(1 ether).div(rateETHUSD);
+    uint256 public ITOweiPerToken;
 
     // start and end timestamp where investments are allowed (both inclusive)
-    uint256 public phaseTwoStartTime;
-    uint256 public phaseTwoEndTime;
+    uint256 public ITOstartTime;
+    uint256 public ITOendTime;
 
     // total wei received during phase two
-    uint256 public phaseTwoWei;
+    uint256 public ITOwei;
     
     // refund if softCap is not reached
     bool public refundAllowed = false;
@@ -83,20 +85,20 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
 
 
     // Hard possible cap - soft cap in wei for phase two
-    uint256 public phaseTwoMainCapInWei = phaseTwoMainCapInUSD.mul(1 ether).div(rateETHUSD);
+    uint256 public ITOmainCapInWei;
 
     // Soft cap in wei
-    uint256 public phaseTwoSoftCapInWei = phaseTwoSoftCapInUSD.mul(1 ether).div(rateETHUSD);
+    uint256 public ITOsoftCapInWei;
 
     // Hard possible cap - soft cap in wei for phase two
-    uint256 public phaseTwoHardCapInWei = phaseTwoSoftCapInWei + phaseTwoMainCapInWei;
+    uint256 public ITOhardCapInWei;
 
 
     // Events
     event TokenPurchase(address indexed beneficiary, uint256 value, uint256 amount);
     event OddMoney(address indexed beneficiary, uint256 value);
-    event SetPhaseOneStartTime(uint256 new_startTimePhaseOne);
-    event SetPhaseTwoStartTime(uint256 new_startTimePhaseTwo);
+    event SetPREITOstartTime(uint256 new_startTimePREITO);
+    event SetITOstartTime(uint256 new_startTimeITO);
 
     modifier validPurchase() {
         bool nonZeroPurchase = msg.value != 0;
@@ -107,60 +109,75 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
     }
 
     modifier isExpired() {
-        require(now > phaseTwoEndTime);
+        require(now > ITOendTime);
 
         _;        
     }
 
-    function withinPeriod () constant returns(bool res) {
-        bool withinPhaseOne = (now >= phaseOneStartTime && now <= phaseOneEndTime);
-        bool withinPhaseTwo = (now >= phaseTwoStartTime && now <= phaseTwoEndTime);
-        return (withinPhaseOne || withinPhaseTwo);
+    /**
+     * @return true if in period or false if not
+     */
+    function withinPeriod() constant returns(bool res) {
+        bool withinPREITO = (now >= PREITOstartTime && now <= PREITOendTime);
+        bool withinITO = (now >= ITOstartTime && now <= ITOendTime);
+        return (withinPREITO || withinITO);
     }
     
 
-
-    function TripleAlphaCrowdsale(uint256 _phaseOneStartTime, uint256 _phaseTwoStartTime, address _wallet) {
-        require(_phaseOneStartTime >= now);
-        require(_phaseTwoStartTime > _phaseOneStartTime);
+    /**
+     * @param _PREITOstartTime Pre-ITO start time
+     * @param _ITOstartTime ITO start time
+     * @param _wallet destination fund address (i hope it will be multi-sig)
+     */
+    function TripleAlphaCrowdsale(uint256 _PREITOstartTime, uint256 _ITOstartTime, address _wallet) {
+        require(_PREITOstartTime >= now);
+        require(_ITOstartTime > _PREITOstartTime);
         require(_wallet != 0x0);
 
         token = new TripleAlphaToken();
         wallet = _wallet;
 
-        setPhaseOneStartTime(_phaseOneStartTime);
-        setPhaseTwoStartTime(_phaseTwoStartTime);
+        _changeEthPrice(300e2);
+        setPREITOstartTime(_PREITOstartTime);
+        setITOstartTime(_ITOstartTime);
+        require(rateETHUSD > 0);
     }
 
-
-    // @return current stage name
+    /**
+     * @dev Human readable period Name 
+     * @return current stage name
+     */
     function stageName() constant public returns (string) {
-        bool beforePeriodPhaseOne = (now < phaseOneStartTime);
-        bool withinPeriodPhaseOne = (now >= phaseOneStartTime && now <= phaseOneEndTime);
-        bool betweenPeriodPhaseOneAndTwo = (now >= phaseOneEndTime && now <= phaseTwoStartTime);
-        bool withinPeriodPhaseTwo = (now >= phaseTwoStartTime && now <= phaseTwoEndTime);
+        bool beforePreITO = (now < PREITOstartTime);
+        bool withinPreITO = (now >= PREITOstartTime && now <= PREITOendTime);
+        bool betweenPreITOAndITO = (now >= PREITOendTime && now <= ITOstartTime);
+        bool withinITO = (now >= ITOstartTime && now <= ITOendTime);
 
-        if(beforePeriodPhaseOne) {
+        if(beforePreITO) {
             return 'Not started';
         }
 
-        if(withinPeriodPhaseOne) {
+        if(withinPreITO) {
             return 'Pre-ITO';
         } 
 
-        if(betweenPeriodPhaseOneAndTwo) {
+        if(betweenPreITOAndITO) {
             return 'Between Pre-ITO and ITO';
         }
 
-        if(withinPeriodPhaseTwo) {
+        if(withinITO) {
             return 'ITO';
         }
 
         return 'Finished';
     }
 
+    /**
+     * @dev Human readable period Name 
+     * @return current stage name
+     */
     function totalWei() public constant returns(uint256) {
-        return phaseOneWei + phaseTwoWei;
+        return PREITOwei + ITOwei;
     }
     
     function totalEther() public constant returns(uint256) {
@@ -168,35 +185,35 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
     }
 
     /*
-     * @dev set first phase start date
-     * @param _at — new start date
+     * @dev update PreITO start time
+     * @param _at new start date
      */
-    function setPhaseOneStartTime(uint256 _at) onlyOwner {
-        require(phaseOneStartTime == 0 || block.timestamp < phaseOneStartTime); // forbid change time when first phase is active
+    function setPREITOstartTime(uint256 _at) onlyOwner {
+        require(PREITOstartTime == 0 || block.timestamp < PREITOstartTime); // forbid change time when first phase is active
         require(block.timestamp < _at); // should be great than current block timestamp
-        require(phaseTwoStartTime == 0 || _at < phaseTwoStartTime); // should be lower than start of second phase
+        require(ITOstartTime == 0 || _at < ITOstartTime); // should be lower than start of second phase
 
-        phaseOneStartTime = _at;
-        phaseOneEndTime = phaseOneStartTime.add(phaseOnePeriod);
-        SetPhaseOneStartTime(_at);
+        PREITOstartTime = _at;
+        PREITOendTime = PREITOstartTime.add(PREITOperiod);
+        SetPREITOstartTime(_at);
     }
 
     /*
-     * @dev set second phase start date
-     * @param _at — new start date
+     * @dev update ITO start date
+     * @param _at new start date
      */
-    function setPhaseTwoStartTime(uint256 _at) onlyOwner {
-        require(phaseTwoStartTime == 0 || block.timestamp < phaseTwoStartTime); // forbid change time when second phase is active
+    function setITOstartTime(uint256 _at) onlyOwner {
+        require(ITOstartTime == 0 || block.timestamp < ITOstartTime); // forbid change time when second phase is active
         require(block.timestamp < _at); // should be great than current block timestamp
-        require(phaseOneEndTime < _at); // should be great than end first phase
+        require(PREITOendTime < _at); // should be great than end first phase
 
-        phaseTwoStartTime = _at;
-        phaseTwoEndTime = phaseTwoStartTime.add(phaseTwoPeriod);
-        SetPhaseTwoStartTime(_at);
+        ITOstartTime = _at;
+        ITOendTime = ITOstartTime.add(ITOperiod);
+        SetITOstartTime(_at);
     }
 
-    function PhaseTwoSoftCapReached() internal returns (bool) {
-        return phaseTwoWei >= phaseTwoSoftCapInWei;
+    function ITOsoftCapReached() internal returns (bool) {
+        return ITOwei >= ITOsoftCapInWei;
     }
 
     /*
@@ -206,24 +223,29 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
         return buyTokens(msg.sender);
     }
 
+    /*
+     * @dev amount calculation, depends of current period
+     * @param _value ETH in wei
+     * @param _at time
+     */
     function calcAmountAt(uint256 _value, uint256 _at) constant public returns (uint256, uint256) {
         uint256 estimate;
         uint256 odd;
 
-        if(_at < phaseOneEndTime) {
-            if(_value.add(phaseOneWei) > phaseOneHardCapInWei) {
-                odd = _value.add(phaseOneWei).sub(phaseOneHardCapInWei);
-                _value = phaseOneHardCapInWei.sub(phaseOneWei);
+        if(_at < PREITOendTime) {
+            if(_value.add(PREITOwei) > PREITOhardCapInWei) {
+                odd = _value.add(PREITOwei).sub(PREITOhardCapInWei);
+                _value = PREITOhardCapInWei.sub(PREITOwei);
             } 
-            estimate = _value.mul(1 ether).div(phaseOneWeiPerToken);
-            require(_value + phaseOneWei <= phaseOneHardCapInWei);
+            estimate = _value.mul(1 ether).div(PREITOweiPerToken);
+            require(_value + PREITOwei <= PREITOhardCapInWei);
         } else {
-            if(_value.add(phaseTwoWei) > phaseTwoHardCapInWei) {
-                odd = _value.add(phaseTwoWei).sub(phaseTwoHardCapInWei);
-                _value = phaseTwoHardCapInWei.sub(phaseTwoWei);
+            if(_value.add(ITOwei) > ITOhardCapInWei) {
+                odd = _value.add(ITOwei).sub(ITOhardCapInWei);
+                _value = ITOhardCapInWei.sub(ITOwei);
             }             
-            estimate = _value.mul(1 ether).div(phaseTwoWeiPerToken);
-            require(_value + phaseTwoWei <= phaseTwoHardCapInWei);
+            estimate = _value.mul(1 ether).div(ITOweiPerToken);
+            require(_value + ITOwei <= ITOhardCapInWei);
         }
 
         return (estimate, odd);
@@ -246,16 +268,16 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
         token.mint(contributor, amount);
         TokenPurchase(contributor, msg.value, amount);
 
-        if(now < phaseOneEndTime) {
+        if(now < PREITOendTime) {
             // Pre-ITO
-            phaseOneWei = phaseOneWei.add(msg.value);
+            PREITOwei = PREITOwei.add(msg.value);
 
         } else {
             // ITO
-            if(PhaseTwoSoftCapReached()) {
-                phaseTwoWei = phaseTwoWei.add(msg.value).sub(odd_ethers);
-            } else if(this.balance >= phaseTwoSoftCapInWei) {
-                phaseTwoWei = this.balance.sub(odd_ethers);
+            if(ITOsoftCapReached()) {
+                ITOwei = ITOwei.add(msg.value).sub(odd_ethers);
+            } else if(this.balance >= ITOsoftCapInWei) {
+                ITOwei = this.balance.sub(odd_ethers);
             } else {
                 received_ethers[contributor] = received_ethers[contributor].add(msg.value);
                 transfer_allowed = false;
@@ -273,10 +295,13 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
         }
     }
 
-    // @refund to backers, if softCap is not reached
+    /*
+     * @dev sell token and send to contributor address
+     * @param contributor address
+     */
     function refund() isExpired public {
         require(refundAllowed);
-        require(!PhaseTwoSoftCapReached());
+        require(!ITOsoftCapReached());
         require(received_ethers[msg.sender] > 0);
         require(token.balanceOf(msg.sender) > 0);
 
@@ -286,17 +311,41 @@ contract TripleAlphaCrowdsale is MultiOwners, Haltable {
         msg.sender.transfer(current_balance);
     }
 
-    function finishCrowdsale() onlyOwner public {
-        require(now > phaseTwoEndTime || phaseTwoWei == phaseTwoHardCapInWei);
+    /*
+     * @dev change eth price
+     */
+    function changeEthPrice(uint256 _price) onlyOwner public {
+        require(_price > 0);
         require(!token.mintingFinished());
 
-        if(PhaseTwoSoftCapReached()) {
+        _changeEthPrice(_price);
+   }
+
+    function _changeEthPrice(uint256 _price) internal {
+        rateETHUSD = _price;
+        PREITOweiPerToken = PREITOtokenPriceUSD.mul(1 ether).div(_price);
+        PREITOmainCapInWei = PREITOmainCapInUSD.mul(1 ether).div(_price);
+        PREITOhardCapInWei = PREITOmainCapInWei;
+
+        ITOweiPerToken = ITOtokenPriceUSD.mul(1 ether).div(_price);
+        ITOmainCapInWei = ITOmainCapInUSD.mul(1 ether).div(_price);
+        ITOsoftCapInWei = ITOsoftCapInUSD.mul(1 ether).div(_price);
+        ITOhardCapInWei = ITOsoftCapInWei + ITOmainCapInWei;
+   }
+    /*
+     * @dev finish crowdsale
+     */
+    function finishCrowdsale() onlyOwner public {
+        require(now > ITOendTime || ITOwei == ITOhardCapInWei);
+        require(!token.mintingFinished());
+
+        if(ITOsoftCapReached()) {
             token.finishMinting(true);
         } else {
             refundAllowed = true;
             token.finishMinting(false);
         }
-   }
+    }
 
     // @return true if crowdsale event has ended
     function running() constant public returns (bool) {
